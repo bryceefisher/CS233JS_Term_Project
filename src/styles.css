@@ -1,0 +1,44 @@
+#map {
+  height: 400px;
+  width: 100%;
+  box-shadow: 2px 2px 5px lightgray;
+  border-radius: 25px;
+}
+
+.navbar {
+  box-shadow: 0px 0px 5px grey;
+}
+
+.inputBubble {
+  border: 0.25px solid lightgray;
+  padding: 20px 5px 10px 5px;
+  border-radius: 75px;
+  box-shadow: 2px 2px 5px lightgray;
+}
+
+#searchCity,
+#searchState,
+#numInput {
+  border: none;
+  outline: none;
+  text-align: right;
+  outline: none;
+  box-shadow: none;
+}
+
+.btn {
+  background-color: gold;
+  color: black;
+  border: none;
+  box-shadow: 2px 2px 5px lightgray;
+}
+
+.beerImg {
+  width: 50px;
+  height: 50;
+}
+
+.btn:hover {
+  background-color: lightblue !important;
+  color: black;
+}
