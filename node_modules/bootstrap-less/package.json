@@ -1,0 +1,39 @@
+{
+  "name": "bootstrap-less",
+  "version": "3.3.8",
+  "description": "less files for bootstrap",
+  "keywords": [
+    "bootstrap",
+    "less"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:distros/bootstrap-less.git"
+  },
+  "bugs": {
+    "url": "https://github.com/distros/bootstrap-less/issues"
+  },
+  "main": "js/bootstrap",
+  "format": "global",
+  "shim": {
+    "js/bootstrap": ["jquery"],
+    "js/bootstrap.min": ["jquery"],
+    "js/affix": ["jquery"],
+    "js/alert": ["jquery"],
+    "js/button": ["jquery"],
+    "js/carousel": ["jquery"],
+    "js/collapse": ["jquery"],
+    "js/dropdown": ["jquery"],
+    "js/modal": ["jquery"],
+    "js/popover": ["jquery"],
+    "js/scrollspy": ["jquery"],
+    "js/tab": ["jquery"],
+    "js/tooltip": ["jquery"],
+    "js/transition": ["jquery"]
+  },
+  "jspm":{
+    "dependencies": {
+      "jquery": "github:components/jquery"
+    }
+  }
+}
