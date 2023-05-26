@@ -10,7 +10,7 @@ class BreweryMap {
   constructor() {
     //define instance variables
     //Google API key from .env file
-    this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+    this.GOOGLE_API_KEY = GOOGLE_API_KEY;
     //citiesObj is an empty object
     this.citiesObj = {};
     //cityOptions is the DOM element with id="cityOptions"
