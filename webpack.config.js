@@ -58,14 +58,13 @@ module.exports = {
       filename: "index.html",
     }),
     new Dotenv(),
-    /* new copyPlugin({
-        patterns: [
-          {
-            from: path.resolve(__dirname, "src/images"),
-            to: path.resolve(__dirname, "dist/images"),
-          },
-        ],
-      }),
-      */
+    new copyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, "src/assets"),
+          to: path.resolve(__dirname, "dist/assets"),
+        },
+      ],
+    }),
   ],
 };

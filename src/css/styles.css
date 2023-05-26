@@ -42,3 +42,8 @@
   background-color: lightblue !important;
   color: black;
 }
+
+#loading-image {
+  width: 50%;
+  height: 50%;
+}

@@ -2,6 +2,7 @@
 import getBreweries from "./beer";
 //import cities.json with npm
 import cities from "cities.json";
+import "./general";
 
 //define BreweryMap class
 class BreweryMap {
@@ -9,7 +10,7 @@ class BreweryMap {
   constructor() {
     //define instance variables
     //Google API key from .env file
-    this.GOOGLE_API_KEY = GOOGLE_API_KEY;
+    this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
     //citiesObj is an empty object
     this.citiesObj = {};
     //cityOptions is the DOM element with id="cityOptions"
@@ -20,6 +21,7 @@ class BreweryMap {
     this.numOptions = document.getElementById("numOptions");
     //bubbleButton is the DOM element with class="bubbleButton"
     this.bubbleButton = document.querySelector(".bubbleButton");
+    this.checkScreenWidth = this.checkScreenWidth.bind(this);
     //coords is an empty string
     this.coords = "";
     //cityLatLng is null
@@ -30,6 +32,8 @@ class BreweryMap {
     this.populateStateOptions();
     this.populateNumOptions();
     this.addBubbleButtonListener();
+
+    window.addEventListener("resize", this.checkScreenWidth);
   }
 
   //define methods
@@ -325,6 +329,20 @@ class BreweryMap {
     document.querySelector("body").appendChild(script);
   }
 
+  checkScreenWidth() {
+    const containerElement = document.getElementById("container");
+
+    // Check the screen size
+    if (window.innerWidth < 1000) {
+      console.log(window.innerWidth);
+      // Add 'container-fluid' class to the class list
+      containerElement.classList.add("container-fluid");
+
+      // Remove 'container' class from the class list
+      containerElement.classList.remove("container");
+    }
+  }
+
   //initialize app
   init() {
     //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
@@ -333,11 +351,17 @@ class BreweryMap {
     this.populateNumOptions();
     this.addBubbleButtonListener();
     this.loadGoogleMaps();
+    this.checkScreenWidth();
   }
 }
 
 //on window load
 window.onload = () => {
+  document.getElementById("loading-container").classList.add("visually-hidden");
+  document
+    .getElementById("content-container")
+    .classList.remove("visually-hidden");
+
   //create new BreweryMap object
   const breweryMap = new BreweryMap();
   //call init function
