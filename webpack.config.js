@@ -2,7 +2,6 @@ const webpack = require("webpack");
 const path = require("path");
 const htmlWebpackPlugin = require("html-webpack-plugin");
 const copyPlugin = require("copy-webpack-plugin");
-const cities = require("cities");
 const Dotenv = require("dotenv-webpack");
 
 module.exports = {
