@@ -10,7 +10,7 @@ class BreweryMap {
   constructor() {
     //define instance variables
     //Google API key from .env file
-    this.GOOGLE_API_KEY = GOOGLE_API_KEY;
+    this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
     //citiesObj is an empty object
     this.citiesObj = {};
     //cityOptions is the DOM element with id="cityOptions"
@@ -134,38 +134,11 @@ class BreweryMap {
   //populate number options
   populateNumOptions() {
     //array of numbers 1-30
-    const numCodes = [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-      "13",
-      "14",
-      "15",
-      "16",
-      "17",
-      "18",
-      "19",
-      "20",
-      "21",
-      "22",
-      "23",
-      "24",
-      "25",
-      "26",
-      "27",
-      "28",
-      "29",
-      "30",
-    ];
+    const numCodes = [];
+
+    for (let i = 1; i <= 30; i++) {
+      numCodes.push(i.toString());
+    }
 
     //for each number in numCodes
     numCodes.forEach((numCode) => {
@@ -189,8 +162,7 @@ class BreweryMap {
     );
     //save response as json
     const data = await response.json();
-
-    //
+    //cityCoords equals an object with lat and lng
     const cityCoords = {
       lat: data.results[0].geometry.location.lat,
       lng: data.results[0].geometry.location.lng,
@@ -334,12 +306,15 @@ class BreweryMap {
 
     // Check the screen size
     if (window.innerWidth < 1000) {
-      console.log(window.innerWidth);
       // Add 'container-fluid' class to the class list
       containerElement.classList.add("container-fluid");
-
       // Remove 'container' class from the class list
       containerElement.classList.remove("container");
+    } else {
+      // Add 'container' class to the class list
+      containerElement.classList.add("container");
+      // Remove 'container-fluid' class from the class list
+      containerElement.classList.remove("container-fluid");
     }
   }
 
