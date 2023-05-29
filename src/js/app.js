@@ -26,6 +26,7 @@ class BreweryMap {
     this.coords = "";
     //cityLatLng is null
     this.cityLatLng = null;
+    this.stateCodes = [];
 
     //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
     this.populateCityOptions();
@@ -65,7 +66,7 @@ class BreweryMap {
   //populate state options
   populateStateOptions() {
     //array of state codes
-    const stateCodes = [
+    this.stateCodes = [
       "AL",
       "AK",
       "AZ",
@@ -119,7 +120,7 @@ class BreweryMap {
     ];
 
     //for each state code
-    stateCodes.forEach((stateCode) => {
+    this.stateCodes.forEach((stateCode) => {
       //create an option element
       const option = document.createElement("option");
       //set the option value to the state code
@@ -258,20 +259,24 @@ class BreweryMap {
   async addBubbleButtonListener() {
     //add event listener  "click" to bubble button
     this.bubbleButton.addEventListener("click", async () => {
-      //empty coords
-      this.coords = "";
-      //searchCity equals the value of the DOM element with id="searchCity"
-      const searchCity = document.getElementById("searchCity").value;
-      //searchState equals the value of the DOM element with id="searchState"
-      const searchState = document.getElementById("searchState").value;
-      //cityLatLng equals the result of getLatLng function with searchCity and searchState as arguments
-      this.cityLatLng = await this.getLatLng(searchCity, searchState);
-      //coords equals the result of getData function with cityLatLng as argument
-      this.coords = await this.getData(this.cityLatLng);
-      //if coords is not empty
-      if (this.coords && Object.keys(this.coords).length > 0) {
-        //call initBrewMap function with coords and cityLatLng as arguments
-        this.initBrewMap(this.coords, this.cityLatLng);
+      if (this.handleValidation() === false) {
+        return;
+      } else {
+        //empty coords
+        this.coords = "";
+        //searchCity equals the value of the DOM element with id="searchCity"
+        const searchCity = document.getElementById("searchCity").value;
+        //searchState equals the value of the DOM element with id="searchState"
+        const searchState = document.getElementById("searchState").value;
+        //cityLatLng equals the result of getLatLng function with searchCity and searchState as arguments
+        this.cityLatLng = await this.getLatLng(searchCity, searchState);
+        //coords equals the result of getData function with cityLatLng as argument
+        this.coords = await this.getData(this.cityLatLng);
+        //if coords is not empty
+        if (this.coords && Object.keys(this.coords).length > 0) {
+          //call initBrewMap function with coords and cityLatLng as arguments
+          this.initBrewMap(this.coords, this.cityLatLng);
+        }
       }
     });
   }
@@ -318,13 +323,57 @@ class BreweryMap {
     }
   }
 
+  handleValidation() {
+    const searchCity = document.getElementById("searchCity");
+    const searchState = document.getElementById("searchState");
+    const numInput = document.getElementById("numInput");
+    const inputBubble1 = document.getElementById("inputBubble1");
+    const inputBubble2 = document.getElementById("inputBubble2");
+    const inputBubble3 = document.getElementById("inputBubble3");
+
+    let errorInputs = [];
+
+    if (searchCity.value === "" || !(searchCity.value in this.citiesObj)) {
+      inputBubble1.classList.add("error");
+      searchCity.classList.add("error");
+      errorInputs.push(searchCity);
+    } else {
+      inputBubble1.classList.remove("error");
+      searchCity.classList.remove("error");
+    }
+
+    if (
+      searchState.value === "" ||
+      !this.stateCodes.includes(searchState.value.toUpperCase())
+    ) {
+      inputBubble2.classList.add("error");
+      searchState.classList.add("error");
+      errorInputs.push(searchState);
+    } else {
+      inputBubble2.classList.remove("error");
+      searchState.classList.remove("error");
+    }
+
+    if (numInput.value === "" || numInput.value < 1 || numInput.value > 30) {
+      inputBubble3.classList.add("error");
+      numInput.classList.add("error");
+      errorInputs.push(numInput);
+    } else {
+      inputBubble3.classList.remove("error");
+      numInput.classList.remove("error");
+    }
+
+    if (errorInputs.length === 0) {
+      errorInputs = [];
+      return true;
+    } else {
+      errorInputs = [];
+      return false;
+    }
+  }
+
   //initialize app
   init() {
-    //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
-    this.populateCityOptions();
-    this.populateStateOptions();
-    this.populateNumOptions();
-    this.addBubbleButtonListener();
     this.loadGoogleMaps();
     this.checkScreenWidth();
   }

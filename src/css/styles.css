@@ -47,3 +47,21 @@
   width: 50%;
   height: 50%;
 }
+
+.error {
+  border: 1px solid red;
+  color: red;
+}
+
+.error::placeholder {
+  color: red;
+  opacity: 1;
+}
+
+.error:-ms-input-placeholder {
+  color: red;
+}
+
+.error::-ms-input-placeholder {
+  color: red;
+}
