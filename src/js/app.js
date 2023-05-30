@@ -405,22 +405,22 @@ class BreweryMap {
   }
 
   displayResults() {
-    const upperDiv = document.getElementById("upperDiv");
     const resultsContainer = document.getElementById("resultsDiv");
     const results = document.getElementById("results");
-    const mapDiv = document.getElementById("mapDiv");
 
     resultsContainer.classList.remove("visually-hidden");
     resultsContainer.classList.add("justify-content-center");
-    results.innerHTML = "";
+    results.innerHTML =
+      "<div class='text-center'><h1><u>Breweries:<h1></u></div>";
 
     Object.values(this.coords).forEach((value, index) => {
       const result = document.createElement("div");
+      result.classList.add("pt-3");
       result.classList.add("col-12");
       result.classList.add("result");
       result.classList.add("text-center");
       result.classList.add("align-items-center");
-      result.innerHTML = `<div><h5>${value.name}</h5></div>
+      result.innerHTML = `<div><h5>${index + 1}. ${value.name}</h5></div>
       <div><p>${value.address}</p></div>
       <div><p>${value.city}, ${value.state}</p></div>
       <div><p>${value.phone}</p></div>
