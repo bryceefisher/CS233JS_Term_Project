@@ -1,8 +1,21 @@
 #map {
   height: 400px;
-  width: 100%;
   box-shadow: 2px 2px 5px lightgray;
   border-radius: 25px;
+}
+
+#resultsDiv {
+  height: 400px;
+  box-shadow: 2px 2px 5px lightgray;
+  border-radius: 25px;
+  background-color: whitesmoke;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent; /* Firefox */
+}
+
+#resultsDiv::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .navbar {
@@ -64,4 +77,9 @@
 
 .error::-ms-input-placeholder {
   color: red;
+}
+
+.result:hover {
+  box-shadow: 0px 0px 5px #d3d3d3;
+  cursor: pointer;
 }

@@ -27,6 +27,7 @@ class BreweryMap {
     //cityLatLng is null
     this.cityLatLng = null;
     this.stateCodes = [];
+    this.markers = [];
 
     //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
     this.populateCityOptions();
@@ -220,6 +221,8 @@ class BreweryMap {
       zoom: 13,
     });
 
+    this.markers = [];
+
     //for each position in markerPositions
     markerPositions.forEach((position, index) => {
       //infowindow equals a new google maps infowindow with content of brewery data
@@ -236,7 +239,7 @@ class BreweryMap {
       const marker = new google.maps.Marker({
         position: position,
         map: map,
-        title: "Hello World!",
+        title: "title",
         icon: {
           url: "./assets/beer.png",
           scaledSize: new google.maps.Size(32, 32),
@@ -250,6 +253,7 @@ class BreweryMap {
           map,
         });
       });
+      this.markers.push({ info: infowindow, marker: marker });
     });
   }
 
@@ -272,10 +276,13 @@ class BreweryMap {
         this.cityLatLng = await this.getLatLng(searchCity, searchState);
         //coords equals the result of getData function with cityLatLng as argument
         this.coords = await this.getData(this.cityLatLng);
+
         //if coords is not empty
         if (this.coords && Object.keys(this.coords).length > 0) {
           //call initBrewMap function with coords and cityLatLng as arguments
           this.initBrewMap(this.coords, this.cityLatLng);
+          this.displayResults();
+          this.checkScreenWidth();
         }
       }
     });
@@ -308,18 +315,43 @@ class BreweryMap {
 
   checkScreenWidth() {
     const containerElement = document.getElementById("container");
+    const upperDiv = document.getElementById("upperDiv");
+    const resultsDiv = document.getElementById("resultsDiv");
+    const mapDiv = document.getElementById("mapDiv");
 
     // Check the screen size
-    if (window.innerWidth < 1000) {
-      // Add 'container-fluid' class to the class list
-      containerElement.classList.add("container-fluid");
-      // Remove 'container' class from the class list
+    if (window.innerWidth < 1000 && this.markers.length > 0) {
       containerElement.classList.remove("container");
-    } else {
-      // Add 'container' class to the class list
-      containerElement.classList.add("container");
-      // Remove 'container-fluid' class from the class list
+      containerElement.classList.add("container-fluid");
+      upperDiv.classList.remove("row");
+      resultsDiv.classList.add("col-12");
+      resultsDiv.classList.remove("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
+    } else if (window.innerWidth >= 1000 && this.markers.length > 0) {
       containerElement.classList.remove("container-fluid");
+      containerElement.classList.add("container");
+      upperDiv.classList.add("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.remove("col-12");
+      mapDiv.classList.add("col-6");
+    } else if (window.innerWidth < 1000 && this.markers.length === 0) {
+      containerElement.classList.remove("container");
+      containerElement.classList.add("container-fluid");
+      upperDiv.classList.remove("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
+    } else if (window.innerWidth >= 1000 && this.markers.length === 0) {
+      containerElement.classList.remove("container-fluid");
+      containerElement.classList.add("container");
+      upperDiv.classList.add("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
     }
   }
 
@@ -370,6 +402,43 @@ class BreweryMap {
       errorInputs = [];
       return false;
     }
+  }
+
+  displayResults() {
+    const upperDiv = document.getElementById("upperDiv");
+    const resultsContainer = document.getElementById("resultsDiv");
+    const results = document.getElementById("results");
+    const mapDiv = document.getElementById("mapDiv");
+
+    resultsContainer.classList.remove("visually-hidden");
+    resultsContainer.classList.add("justify-content-center");
+    results.innerHTML = "";
+
+    Object.values(this.coords).forEach((value, index) => {
+      const result = document.createElement("div");
+      result.classList.add("col-12");
+      result.classList.add("result");
+      result.classList.add("text-center");
+      result.classList.add("align-items-center");
+      result.innerHTML = `<div><h5>${value.name}</h5></div>
+      <div><p>${value.address}</p></div>
+      <div><p>${value.city}, ${value.state}</p></div>
+      <div><p>${value.phone}</p></div>
+      <div><a href="${value.website}">${value.website}</a></div>
+      <hr>`;
+
+      result.addEventListener("click", () => {
+        if (this.markers[index].info.isOpen) {
+          this.markers[index].info.close();
+          this.markers[index].info.isOpen = false;
+        } else {
+          google.maps.event.trigger(this.markers[index].marker, "click");
+          this.markers[index].info.isOpen = true;
+        }
+      });
+
+      results.appendChild(result);
+    });
   }
 
   //initialize app
