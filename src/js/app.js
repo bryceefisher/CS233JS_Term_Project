@@ -9,6 +9,14 @@ class BreweryMap {
   //define constructor
   constructor() {
     //define instance variables
+    //ui elements
+    this.$searchCity = document.getElementById("searchCity");
+    this.$searchState = document.getElementById("searchState");
+    this.$numInput = document.getElementById("numInput");
+    this.$submitBtn = document.getElementById("submitBtn");
+    this.$resetBtn = document.getElementById("resetBtn");
+    //bubbleButton is the DOM element with class="bubbleButton"
+    this.$bubbleButton = document.querySelector(".bubbleButton");
     //Google API key from .env file
     this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
     //citiesObj is an empty object
@@ -20,7 +28,6 @@ class BreweryMap {
     //numOptions is the DOM element with id="numOptions"
     this.numOptions = document.getElementById("numOptions");
     //bubbleButton is the DOM element with class="bubbleButton"
-    this.bubbleButton = document.querySelector(".bubbleButton");
     this.checkScreenWidth = this.checkScreenWidth.bind(this);
     //coords is an empty string
     this.coords = "";
@@ -34,6 +41,7 @@ class BreweryMap {
     this.populateStateOptions();
     this.populateNumOptions();
     this.addBubbleButtonListener();
+    this.addResetButtonListener();
 
     window.addEventListener("resize", this.checkScreenWidth);
   }
@@ -262,7 +270,7 @@ class BreweryMap {
 
   async addBubbleButtonListener() {
     //add event listener  "click" to bubble button
-    this.bubbleButton.addEventListener("click", async () => {
+    this.$bubbleButton.addEventListener("click", async () => {
       if (this.handleValidation() === false) {
         return;
       } else {
@@ -285,6 +293,13 @@ class BreweryMap {
           this.checkScreenWidth();
         }
       }
+    });
+  }
+
+  addResetButtonListener() {
+    this.$resetBtn.addEventListener("click", () => {
+      console.log("reset");
+      this.resetForm();
     });
   }
 
@@ -356,43 +371,37 @@ class BreweryMap {
   }
 
   handleValidation() {
-    const searchCity = document.getElementById("searchCity");
-    const searchState = document.getElementById("searchState");
-    const numInput = document.getElementById("numInput");
-    const inputBubble1 = document.getElementById("inputBubble1");
-    const inputBubble2 = document.getElementById("inputBubble2");
-    const inputBubble3 = document.getElementById("inputBubble3");
-
     let errorInputs = [];
 
-    if (searchCity.value === "" || !(searchCity.value in this.citiesObj)) {
-      inputBubble1.classList.add("error");
-      searchCity.classList.add("error");
-      errorInputs.push(searchCity);
+    if (
+      this.$searchCity.value == "" ||
+      !(this.$searchCity.value in this.citiesObj)
+    ) {
+      this.$searchCity.classList.add("is-invalid");
+      errorInputs.push(this.$searchCity);
     } else {
-      inputBubble1.classList.remove("error");
-      searchCity.classList.remove("error");
+      this.$searchCity.classList.remove("is-invalid");
     }
 
     if (
-      searchState.value === "" ||
-      !this.stateCodes.includes(searchState.value.toUpperCase())
+      this.$searchState.value == "" ||
+      !this.stateCodes.includes(this.$searchState.value.toUpperCase())
     ) {
-      inputBubble2.classList.add("error");
-      searchState.classList.add("error");
-      errorInputs.push(searchState);
+      this.$searchState.classList.add("is-invalid");
+      errorInputs.push(this.$searchState);
     } else {
-      inputBubble2.classList.remove("error");
-      searchState.classList.remove("error");
+      this.$searchState.classList.remove("is-invalid");
     }
 
-    if (numInput.value === "" || numInput.value < 1 || numInput.value > 30) {
-      inputBubble3.classList.add("error");
-      numInput.classList.add("error");
-      errorInputs.push(numInput);
+    if (
+      this.$numInput.value == "" ||
+      this.$numInput.value < 1 ||
+      this.$numInput.value > 30
+    ) {
+      this.$numInput.classList.add("is-invalid");
+      errorInputs.push(this.$numInput);
     } else {
-      inputBubble3.classList.remove("error");
-      numInput.classList.remove("error");
+      this.$numInput.classList.remove("is-invalid");
     }
 
     if (errorInputs.length === 0) {
@@ -402,6 +411,26 @@ class BreweryMap {
       errorInputs = [];
       return false;
     }
+  }
+
+  resetForm() {
+    this.$searchCity.value = "";
+    this.$searchState.value = "";
+    this.$numInput.value = "";
+
+    this.$searchCity.classList.remove("is-invalid");
+    this.$searchState.classList.remove("is-invalid");
+    this.$numInput.classList.remove("is-invalid");
+
+    const resultsContainer = document.getElementById("resultsDiv");
+    const results = document.getElementById("results");
+
+    resultsContainer.classList.add("visually-hidden");
+
+    results.innerHTML = "";
+    this.markers = [];
+    this.initMap();
+    this.checkScreenWidth();
   }
 
   displayResults() {
