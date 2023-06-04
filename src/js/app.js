@@ -9,6 +9,14 @@ class BreweryMap {
   //define constructor
   constructor() {
     //define instance variables
+    //ui elements
+    this.$searchCity = document.getElementById("searchCity");
+    this.$searchState = document.getElementById("searchState");
+    this.$numInput = document.getElementById("numInput");
+    this.$submitBtn = document.getElementById("submitBtn");
+    this.$resetBtn = document.getElementById("resetBtn");
+    //bubbleButton is the DOM element with class="bubbleButton"
+    this.$bubbleButton = document.querySelector(".bubbleButton");
     //Google API key from .env file
     this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
     //citiesObj is an empty object
@@ -20,19 +28,20 @@ class BreweryMap {
     //numOptions is the DOM element with id="numOptions"
     this.numOptions = document.getElementById("numOptions");
     //bubbleButton is the DOM element with class="bubbleButton"
-    this.bubbleButton = document.querySelector(".bubbleButton");
     this.checkScreenWidth = this.checkScreenWidth.bind(this);
     //coords is an empty string
     this.coords = "";
     //cityLatLng is null
     this.cityLatLng = null;
     this.stateCodes = [];
+    this.markers = [];
 
     //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
     this.populateCityOptions();
     this.populateStateOptions();
     this.populateNumOptions();
     this.addBubbleButtonListener();
+    this.addResetButtonListener();
 
     window.addEventListener("resize", this.checkScreenWidth);
   }
@@ -220,6 +229,8 @@ class BreweryMap {
       zoom: 13,
     });
 
+    this.markers = [];
+
     //for each position in markerPositions
     markerPositions.forEach((position, index) => {
       //infowindow equals a new google maps infowindow with content of brewery data
@@ -236,7 +247,7 @@ class BreweryMap {
       const marker = new google.maps.Marker({
         position: position,
         map: map,
-        title: "Hello World!",
+        title: "title",
         icon: {
           url: "./assets/beer.png",
           scaledSize: new google.maps.Size(32, 32),
@@ -250,6 +261,7 @@ class BreweryMap {
           map,
         });
       });
+      this.markers.push({ info: infowindow, marker: marker });
     });
   }
 
@@ -258,7 +270,7 @@ class BreweryMap {
 
   async addBubbleButtonListener() {
     //add event listener  "click" to bubble button
-    this.bubbleButton.addEventListener("click", async () => {
+    this.$bubbleButton.addEventListener("click", async () => {
       if (this.handleValidation() === false) {
         return;
       } else {
@@ -272,12 +284,22 @@ class BreweryMap {
         this.cityLatLng = await this.getLatLng(searchCity, searchState);
         //coords equals the result of getData function with cityLatLng as argument
         this.coords = await this.getData(this.cityLatLng);
+
         //if coords is not empty
         if (this.coords && Object.keys(this.coords).length > 0) {
           //call initBrewMap function with coords and cityLatLng as arguments
           this.initBrewMap(this.coords, this.cityLatLng);
+          this.displayResults();
+          this.checkScreenWidth();
         }
       }
+    });
+  }
+
+  addResetButtonListener() {
+    this.$resetBtn.addEventListener("click", () => {
+      console.log("reset");
+      this.resetForm();
     });
   }
 
@@ -308,59 +330,78 @@ class BreweryMap {
 
   checkScreenWidth() {
     const containerElement = document.getElementById("container");
+    const upperDiv = document.getElementById("upperDiv");
+    const resultsDiv = document.getElementById("resultsDiv");
+    const mapDiv = document.getElementById("mapDiv");
 
     // Check the screen size
-    if (window.innerWidth < 1000) {
-      // Add 'container-fluid' class to the class list
-      containerElement.classList.add("container-fluid");
-      // Remove 'container' class from the class list
+    if (window.innerWidth < 1000 && this.markers.length > 0) {
       containerElement.classList.remove("container");
-    } else {
-      // Add 'container' class to the class list
-      containerElement.classList.add("container");
-      // Remove 'container-fluid' class from the class list
+      containerElement.classList.add("container-fluid");
+      upperDiv.classList.remove("row");
+      resultsDiv.classList.add("col-12");
+      resultsDiv.classList.remove("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
+    } else if (window.innerWidth >= 1000 && this.markers.length > 0) {
       containerElement.classList.remove("container-fluid");
+      containerElement.classList.add("container");
+      upperDiv.classList.add("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.remove("col-12");
+      mapDiv.classList.add("col-6");
+    } else if (window.innerWidth < 1000 && this.markers.length === 0) {
+      containerElement.classList.remove("container");
+      containerElement.classList.add("container-fluid");
+      upperDiv.classList.remove("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
+    } else if (window.innerWidth >= 1000 && this.markers.length === 0) {
+      containerElement.classList.remove("container-fluid");
+      containerElement.classList.add("container");
+      upperDiv.classList.add("row");
+      resultsDiv.classList.remove("col-12");
+      resultsDiv.classList.add("col-6");
+      mapDiv.classList.add("col-12");
+      mapDiv.classList.remove("col-6");
     }
   }
 
   handleValidation() {
-    const searchCity = document.getElementById("searchCity");
-    const searchState = document.getElementById("searchState");
-    const numInput = document.getElementById("numInput");
-    const inputBubble1 = document.getElementById("inputBubble1");
-    const inputBubble2 = document.getElementById("inputBubble2");
-    const inputBubble3 = document.getElementById("inputBubble3");
-
     let errorInputs = [];
 
-    if (searchCity.value === "" || !(searchCity.value in this.citiesObj)) {
-      inputBubble1.classList.add("error");
-      searchCity.classList.add("error");
-      errorInputs.push(searchCity);
+    if (
+      this.$searchCity.value == "" ||
+      !(this.$searchCity.value in this.citiesObj)
+    ) {
+      this.$searchCity.classList.add("is-invalid");
+      errorInputs.push(this.$searchCity);
     } else {
-      inputBubble1.classList.remove("error");
-      searchCity.classList.remove("error");
+      this.$searchCity.classList.remove("is-invalid");
     }
 
     if (
-      searchState.value === "" ||
-      !this.stateCodes.includes(searchState.value.toUpperCase())
+      this.$searchState.value == "" ||
+      !this.stateCodes.includes(this.$searchState.value.toUpperCase())
     ) {
-      inputBubble2.classList.add("error");
-      searchState.classList.add("error");
-      errorInputs.push(searchState);
+      this.$searchState.classList.add("is-invalid");
+      errorInputs.push(this.$searchState);
     } else {
-      inputBubble2.classList.remove("error");
-      searchState.classList.remove("error");
+      this.$searchState.classList.remove("is-invalid");
     }
 
-    if (numInput.value === "" || numInput.value < 1 || numInput.value > 30) {
-      inputBubble3.classList.add("error");
-      numInput.classList.add("error");
-      errorInputs.push(numInput);
+    if (
+      this.$numInput.value == "" ||
+      this.$numInput.value < 1 ||
+      this.$numInput.value > 30
+    ) {
+      this.$numInput.classList.add("is-invalid");
+      errorInputs.push(this.$numInput);
     } else {
-      inputBubble3.classList.remove("error");
-      numInput.classList.remove("error");
+      this.$numInput.classList.remove("is-invalid");
     }
 
     if (errorInputs.length === 0) {
@@ -370,6 +411,63 @@ class BreweryMap {
       errorInputs = [];
       return false;
     }
+  }
+
+  resetForm() {
+    this.$searchCity.value = "";
+    this.$searchState.value = "";
+    this.$numInput.value = "";
+
+    this.$searchCity.classList.remove("is-invalid");
+    this.$searchState.classList.remove("is-invalid");
+    this.$numInput.classList.remove("is-invalid");
+
+    const resultsContainer = document.getElementById("resultsDiv");
+    const results = document.getElementById("results");
+
+    resultsContainer.classList.add("visually-hidden");
+
+    results.innerHTML = "";
+    this.markers = [];
+    this.initMap();
+    this.checkScreenWidth();
+  }
+
+  displayResults() {
+    const resultsContainer = document.getElementById("resultsDiv");
+    const results = document.getElementById("results");
+
+    resultsContainer.classList.remove("visually-hidden");
+    resultsContainer.classList.add("justify-content-center");
+    results.innerHTML =
+      "<div class='text-center'><h1><u>Breweries:<h1></u></div>";
+
+    Object.values(this.coords).forEach((value, index) => {
+      const result = document.createElement("div");
+      result.classList.add("pt-3");
+      result.classList.add("col-12");
+      result.classList.add("result");
+      result.classList.add("text-center");
+      result.classList.add("align-items-center");
+      result.innerHTML = `<div><h5>${index + 1}. ${value.name}</h5></div>
+      <div><p>${value.address}</p></div>
+      <div><p>${value.city}, ${value.state}</p></div>
+      <div><p>${value.phone}</p></div>
+      <div><a href="${value.website}">${value.website}</a></div>
+      <hr>`;
+
+      result.addEventListener("click", () => {
+        if (this.markers[index].info.isOpen) {
+          this.markers[index].info.close();
+          this.markers[index].info.isOpen = false;
+        } else {
+          google.maps.event.trigger(this.markers[index].marker, "click");
+          this.markers[index].info.isOpen = true;
+        }
+      });
+
+      results.appendChild(result);
+    });
   }
 
   //initialize app
