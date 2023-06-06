@@ -1,16 +1,33 @@
 #map {
-  height: 400px;
+  height: 600px;
   box-shadow: 2px 2px 5px lightgray;
   border-radius: 25px;
 }
 
 #resultsDiv {
-  height: 400px;
+  height: 600px;
   box-shadow: 2px 2px 5px lightgray;
   border-radius: 25px;
   background-color: whitesmoke;
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: transparent transparent; /* Firefox */
+}
+
+@media (max-width: 1000px) {
+  #map {
+    height: 300px;
+    box-shadow: 2px 2px 5px lightgray;
+    border-radius: 25px;
+  }
+
+  #resultsDiv {
+    height: 300px;
+    box-shadow: 2px 2px 5px lightgray;
+    border-radius: 25px;
+    background-color: whitesmoke;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: transparent transparent; /* Firefox */
+  }
 }
 
 #resultsDiv::-webkit-scrollbar {

@@ -15,34 +15,47 @@ class BreweryMap {
     this.$numInput = document.getElementById("numInput");
     this.$submitBtn = document.getElementById("submitBtn");
     this.$resetBtn = document.getElementById("resetBtn");
-    //bubbleButton is the DOM element with class="bubbleButton"
     this.$bubbleButton = document.querySelector(".bubbleButton");
+    this.$inputDiv = document.getElementById("inputDiv");
+    this.$resultsDiv = document.getElementById("resultsDiv");
+    this.cityOptions = document.getElementById("cityOptions");
+    this.stateOptions = document.getElementById("stateOptions");
+    this.numOptions = document.getElementById("numOptions");
+    this.$numInput = document.querySelector("#numInput");
+    this.$container = document.getElementById("container");
+    this.$upperDiv = document.getElementById("upperDiv");
+    this.$resultsDiv = document.getElementById("resultsDiv");
+    this.$mapDiv = document.getElementById("mapDiv");
+    this.$instructionButton = document.querySelector(".instructionButton");
+    this.$instructionButtonNav = document.querySelector(
+      ".instructionButtonNav"
+    );
+    this.$resultsContainer = document.getElementById("resultsDiv");
+    this.$results = document.getElementById("results");
+    this.$spanDiv = document.querySelector(".spanDiv");
+    this.$resultsContainer = document.getElementById("resultsDiv");
+    this.$results = document.getElementById("results");
+
     //Google API key from .env file
     this.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
     //citiesObj is an empty object
     this.citiesObj = {};
-    //cityOptions is the DOM element with id="cityOptions"
-    this.cityOptions = document.getElementById("cityOptions");
-    //stateOptions is the DOM element with id="stateOptions"
-    this.stateOptions = document.getElementById("stateOptions");
-    //numOptions is the DOM element with id="numOptions"
-    this.numOptions = document.getElementById("numOptions");
     //bubbleButton is the DOM element with class="bubbleButton"
     this.checkScreenWidth = this.checkScreenWidth.bind(this);
     //coords is an empty string
     this.coords = "";
-    //cityLatLng is null
     this.cityLatLng = null;
     this.stateCodes = [];
     this.markers = [];
 
-    //call populateCityOptions, populateStateOptions, populateNumOptions, and addBubbleButtonListener
+    //call populateCityOptions, populateStateOptions, populateNumOptions, addBubbleButtonListener, addResetButtonListener, and dynamicFooterYear methods
     this.populateCityOptions();
     this.populateStateOptions();
     this.populateNumOptions();
     this.addBubbleButtonListener();
     this.addResetButtonListener();
-
+    this.dynamicFooterYear();
+    //this.checkScreenWidth() checks the screen width and sets the inputDiv and resultsDiv display accordingly
     window.addEventListener("resize", this.checkScreenWidth);
   }
 
@@ -189,7 +202,7 @@ class BreweryMap {
     //save city longitude as cityLng
     const cityLng = cityLatLng.lng;
     //save number of breweries as numBreweries
-    const numBreweries = document.querySelector("#numInput").value;
+    const numBreweries = this.$numInput.value;
     //return getBreweries function with cityLat, cityLng, and numBreweries as arguments
     return getBreweries(cityLat, cityLng, numBreweries);
   }
@@ -207,15 +220,6 @@ class BreweryMap {
         lat: parseFloat(item.position.lat),
         lng: parseFloat(item.position.lng),
       }));
-    } else {
-      //markerPositions equals an array of objects with lat and lng of eugene
-      markerPositions = [
-        { lat: 44.05674657, lng: -123.0864976 },
-        { lat: 44.04979409, lng: -123.0824349 },
-        { lat: 44.04539623, lng: -123.0921962 },
-        { lat: 44.05174833, lng: -123.0928507 },
-        { lat: 44.054404, lng: -123.089843 },
-      ];
     }
 
     //centerCoords equals cityLatLng or eugene
@@ -228,7 +232,7 @@ class BreweryMap {
       center: centerCoords,
       zoom: 13,
     });
-
+    //set markers to empty array
     this.markers = [];
 
     //for each position in markerPositions
@@ -247,7 +251,6 @@ class BreweryMap {
       const marker = new google.maps.Marker({
         position: position,
         map: map,
-        title: "title",
         icon: {
           url: "./assets/beer.png",
           scaledSize: new google.maps.Size(32, 32),
@@ -287,27 +290,32 @@ class BreweryMap {
 
         //if coords is not empty
         if (this.coords && Object.keys(this.coords).length > 0) {
+          //hide form elements
+          this.$submitBtn.classList.add("visually-hidden");
+          this.$inputDiv.classList.add("visually-hidden");
+          this.$resultsDiv.classList.add("mb-5");
           //call initBrewMap function with coords and cityLatLng as arguments
           this.initBrewMap(this.coords, this.cityLatLng);
+          //display the results div
           this.displayResults();
+          //call checkScreenWidth function
           this.checkScreenWidth();
         }
       }
     });
   }
-
+  //add an event listener to the reset button
   addResetButtonListener() {
     this.$resetBtn.addEventListener("click", () => {
-      console.log("reset");
+      //call resetForm function on click
       this.resetForm();
     });
   }
 
-  //initialize default map
+  //initialize default map on page load or reset
   initMap() {
     //centerCoords equals eugene
     let centerCoords = { lat: 44.05674657, lng: -123.0864976 };
-
     //map equals a new google map with centerCoords and zoom of 13
     const map = new google.maps.Map(document.getElementById("map"), {
       center: centerCoords,
@@ -315,7 +323,7 @@ class BreweryMap {
     });
   }
 
-  //load google maps
+  //load the map with brewery data
   loadGoogleMaps() {
     //call initMap function
     window.initMap = this.initMap;
@@ -328,11 +336,13 @@ class BreweryMap {
     document.querySelector("body").appendChild(script);
   }
 
+  //actively check the screen width and adjust the layout accordingly
   checkScreenWidth() {
-    const containerElement = document.getElementById("container");
-    const upperDiv = document.getElementById("upperDiv");
-    const resultsDiv = document.getElementById("resultsDiv");
-    const mapDiv = document.getElementById("mapDiv");
+    console.log(window.innerWidth);
+    const containerElement = this.$container;
+    const upperDiv = this.$upperDiv;
+    const resultsDiv = this.$resultsDiv;
+    const mapDiv = this.$mapDiv;
 
     // Check the screen size
     if (window.innerWidth < 1000 && this.markers.length > 0) {
@@ -368,21 +378,41 @@ class BreweryMap {
       mapDiv.classList.add("col-12");
       mapDiv.classList.remove("col-6");
     }
+    //when screen size drops below 550px, hide the instruction button in the nav and show the instruction button in the results div
+    if (window.innerWidth < 550) {
+      this.$instructionButtonNav.classList.add("visually-hidden");
+      this.$instructionButton.classList.remove("visually-hidden");
+      this.$spanDiv.classList.remove("align-items-center", "container-fluid");
+    }
+
+    if (window.innerWidth >= 550) {
+      this.$instructionButtonNav.classList.remove("visually-hidden");
+      this.$instructionButton.classList.add("visually-hidden");
+      this.$spanDiv.classList.add("align-items-center", "container-fluid");
+    }
   }
 
+  //input validation
   handleValidation() {
+    //create an empty array to hold error inputs
     let errorInputs = [];
-
+    //create a function to capitalize the first letter of each word in a string
+    const titleCase = (str) => {
+      return str.toLowerCase().replace(/(?:^|\s)\w/g, (match) => {
+        return match.toUpperCase();
+      });
+    };
+    //if searchCity is empty or not in citiesObj, add is-invalid class and push to errorInputs array
     if (
       this.$searchCity.value == "" ||
-      !(this.$searchCity.value in this.citiesObj)
+      !(titleCase(this.$searchCity.value) in this.citiesObj)
     ) {
       this.$searchCity.classList.add("is-invalid");
       errorInputs.push(this.$searchCity);
     } else {
       this.$searchCity.classList.remove("is-invalid");
     }
-
+    //if searchState is empty or not in stateCodes array, add is-invalid class and push to errorInputs array
     if (
       this.$searchState.value == "" ||
       !this.stateCodes.includes(this.$searchState.value.toUpperCase())
@@ -392,7 +422,7 @@ class BreweryMap {
     } else {
       this.$searchState.classList.remove("is-invalid");
     }
-
+    //if numInput is empty or less than 1 or greater than 30, add is-invalid class and push to errorInputs array
     if (
       this.$numInput.value == "" ||
       this.$numInput.value < 1 ||
@@ -403,7 +433,7 @@ class BreweryMap {
     } else {
       this.$numInput.classList.remove("is-invalid");
     }
-
+    //if errorInputs array is empty, return true, else return false. Clear array after each check
     if (errorInputs.length === 0) {
       errorInputs = [];
       return true;
@@ -413,35 +443,43 @@ class BreweryMap {
     }
   }
 
+  //function to reset the form
   resetForm() {
+    //reset all input values
     this.$searchCity.value = "";
     this.$searchState.value = "";
     this.$numInput.value = "";
-
+    //remove is-invalid class from all inputs
     this.$searchCity.classList.remove("is-invalid");
     this.$searchState.classList.remove("is-invalid");
     this.$numInput.classList.remove("is-invalid");
 
-    const resultsContainer = document.getElementById("resultsDiv");
-    const results = document.getElementById("results");
+    this.$resultsContainer.classList.add("visually-hidden");
+    this.$inputDiv.classList.remove("visually-hidden");
+    this.$submitBtn.classList.remove("visually-hidden");
 
-    resultsContainer.classList.add("visually-hidden");
-
-    results.innerHTML = "";
+    this.$results.innerHTML = "";
     this.markers = [];
     this.initMap();
     this.checkScreenWidth();
   }
 
+  //function to display the current year in the footer
+  dynamicFooterYear() {
+    const footerYear = document.getElementById("currentYear");
+    const currentYear = new Date().getFullYear();
+    footerYear.innerHTML = currentYear;
+  }
+
+  //function to display the results in the results div
   displayResults() {
-    const resultsContainer = document.getElementById("resultsDiv");
-    const results = document.getElementById("results");
-
-    resultsContainer.classList.remove("visually-hidden");
-    resultsContainer.classList.add("justify-content-center");
-    results.innerHTML =
+    //remove the visually-hidden class from the results div
+    this.$resultsContainer.classList.remove("visually-hidden");
+    this.$resultsContainer.classList.add("justify-content-center");
+    //add a header to the results list
+    this.$results.innerHTML =
       "<div class='text-center'><h1><u>Breweries:<h1></u></div>";
-
+    //loop through the coords object and create a div for each brewery
     Object.values(this.coords).forEach((value, index) => {
       const result = document.createElement("div");
       result.classList.add("pt-3");
@@ -455,7 +493,7 @@ class BreweryMap {
       <div><p>${value.phone}</p></div>
       <div><a href="${value.website}">${value.website}</a></div>
       <hr>`;
-
+      //add a click event listener to each result div that triggers the click event on the corresponding marker
       result.addEventListener("click", () => {
         if (this.markers[index].info.isOpen) {
           this.markers[index].info.close();
@@ -465,8 +503,8 @@ class BreweryMap {
           this.markers[index].info.isOpen = true;
         }
       });
-
-      results.appendChild(result);
+      //append each result div to the results div
+      this.$results.appendChild(result);
     });
   }
 
@@ -479,10 +517,12 @@ class BreweryMap {
 
 //on window load
 window.onload = () => {
+  //remove the visually-hidden class from the content container and footer
   document.getElementById("loading-container").classList.add("visually-hidden");
   document
     .getElementById("content-container")
     .classList.remove("visually-hidden");
+  document.getElementById("footer").classList.remove("visually-hidden");
 
   //create new BreweryMap object
   const breweryMap = new BreweryMap();

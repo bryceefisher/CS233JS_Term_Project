@@ -13,12 +13,12 @@ export default async function getBreweries(cityLat, cityLng, numBreweries) {
   Object.values(data).forEach((value, index) => {
     //set coords at index to an object with name, address, city, state, phone, website, and position
     coords[index] = {
-      name: value.name,
-      address: value.address_1,
-      city: value.city,
-      state: value.state,
-      phone: value.phone,
-      website: value.website_url,
+      name: value.name == null ? "" : value.name,
+      address: value.address_1 == null ? "" : value.address_1,
+      city: value.city == null ? "" : value.city,
+      state: value.state == null ? "" : value.state,
+      phone: value.phone == null ? "" : value.phone,
+      website: value.website_url == null ? "" : value.website_url,
       //position is an object with lat and lng
       position: { lat: value.latitude, lng: value.longitude },
     };
